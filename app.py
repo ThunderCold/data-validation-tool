@@ -43,7 +43,9 @@ global yaml_data2
 sleep_time = 7
 page2_curnum = 0
 page2_yaml_len = 0
+cur_page = 1 # function in queue
 constraints_list = ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'minLength', 'maxLength', 'jsonSchema', 'pattern', 'enum']
+type_list = ['string', 'number', 'integer', 'boolean', 'datetime', 'date', 'time', 'year', 'yearmonth', 'duration', 'geopoint', 'geojson', 'any', 'object', 'array', 'list']
 
 def showPage1():
     frame2.pack_forget()
@@ -168,6 +170,10 @@ def submitPress():
                         newMessege('InvalidArgument error occurred, please check API key')
                         error_break = True
                         break
+                    except Exception as e:
+                        newMessege('Unexpected error occurred')
+                        error_break = True
+                        break
 
                 if error_break:
                     break
@@ -210,7 +216,7 @@ def page2Show(cur):
     else:
         btn2_next.config(state='normal')
     entry2_name.delete(0, tk.END)
-    entry2_type.delete(0, tk.END)
+    # entry2_type.delete(0, tk.END)
     entry2_description.delete(0, tk.END)
     for i in entry2_constraints:
         i.delete(0, tk.END)
@@ -219,7 +225,8 @@ def page2Show(cur):
     if 'name' in yaml_data2['fields'][cur]:
         entry2_name.insert(tk.END, yaml_data2['fields'][cur]['name'])
     if 'type' in yaml_data2['fields'][cur]:
-        entry2_type.insert(tk.END, yaml_data2['fields'][cur]['type'])
+        omenu2_type_var.set(yaml_data2['fields'][cur]['type'])
+        # entry2_type.insert(tk.END, yaml_data2['fields'][cur]['type'])
     if 'description' in yaml_data2['fields'][cur]:
         entry2_description.insert(tk.END, yaml_data2['fields'][cur]['description'])
     if 'constraints' in yaml_data2['fields'][cur]:
@@ -240,6 +247,13 @@ def submit2Press():
     page2_curnum = 0
     with open(entry2_yaml.get(), 'r', encoding='utf-8') as file:
         yaml_data2 = yaml.safe_load(file)
+    entry2_name.config(state='normal')
+    omenu2_type.config(state='normal')
+    entry2_description.config(state='normal')
+    chkbox2_required.config(state='normal')
+    chkbox2_unique.config(state='normal')
+    for i in entry2_constraints:
+        i.config(state='normal')
     btn2_save.config(state='normal')
     page2Show(page2_curnum)
 
@@ -247,8 +261,9 @@ def tmpSave(cur):
     global yaml_data2
     if entry2_name.get() != "":
         yaml_data2['fields'][cur]['name'] = entry2_name.get()
-    if entry2_type.get() != "":
-        yaml_data2['fields'][cur]['type'] = entry2_type.get()
+    # if entry2_type.get() != "":
+    #     yaml_data2['fields'][cur]['type'] = entry2_type.get()
+    yaml_data2['fields'][cur]['type'] = omenu2_type_var.get()
     if entry2_description.get() != "":
         yaml_data2['fields'][cur]['description'] = entry2_description.get()
     d = {}
@@ -482,39 +497,40 @@ lbl2_enum = tk.Label(
 )
 
 entry2_yaml = tk.Entry(frame2, font=custom_font, width=50)
-entry2_name = tk.Entry(frame2, font=custom_font, width=50)
-entry2_type = tk.Entry(frame2, font=custom_font, width=50)
-entry2_description = tk.Entry(frame2, font=custom_font, width=50)
-# entry2_minimum = tk.Entry(frame2, font=custom_font, width=15)
-# entry2_maximum = tk.Entry(frame2, font=custom_font, width=15)
-# entry2_minLength = tk.Entry(frame2, font=custom_font, width=15)
-# entry2_maxLength = tk.Entry(frame2, font=custom_font, width=15)
-# entry2_exclusiveMinimum = tk.Entry(frame2, font=custom_font, width=15)
-# entry2_exclusiveMaximum = tk.Entry(frame2, font=custom_font, width=15)
-# entry2_jsonSchema = tk.Entry(frame2, font=custom_font, width=15)
-# entry2_pattern = tk.Entry(frame2, font=custom_font, width=15)
-# entry2_enum = tk.Entry(frame2, font=custom_font, width=15)
+entry2_name = tk.Entry(frame2, font=custom_font, width=50, state='disabled')
+# entry2_type = tk.Entry(frame2, font=custom_font, width=50)
+entry2_description = tk.Entry(frame2, font=custom_font, width=50, state='disabled')
+
+omenu2_type_var = tk.StringVar()
+omenu2_type = tk.OptionMenu(
+    frame2,
+    omenu2_type_var,
+    *type_list
+)
+omenu2_type.config(state='disabled')
 
 chkbox2_required_var = tk.BooleanVar()
 chkbox2_unique_var = tk.BooleanVar()
 entry2_constraints = []
 for i in range(9):
     entry2_constraints.append(
-        tk.Entry(frame2, font=custom_font, width=20)
+        tk.Entry(frame2, font=custom_font, width=20, state='disabled')
     )
 
 chkbox2_required = tk.Checkbutton(
     frame2,
     text='',
     font=custom_font,
-    variable=chkbox2_required_var
+    variable=chkbox2_required_var,
+    state='disabled'
 )
 
 chkbox2_unique = tk.Checkbutton(
     frame2,
     text='',
     font=custom_font,
-    variable=chkbox2_unique_var
+    variable=chkbox2_unique_var,
+    state='disabled'
 )
 
 btn2_browse_yaml = tk.Button(
@@ -573,7 +589,7 @@ lbl2_pattern.place(x=740, y=550)
 lbl2_enum.place(x=250, y=600)
 entry2_yaml.place(x=250, y=100)
 entry2_name.place(x=250, y=200)
-entry2_type.place(x=250, y=250)
+omenu2_type.place(x=250, y=250)
 entry2_description.place(x=250, y=300)
 entry2_constraints[0].place(x=450, y=400)
 entry2_constraints[1].place(x=940, y=400)
