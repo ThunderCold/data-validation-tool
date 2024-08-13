@@ -14,7 +14,7 @@ window = tk.Tk()
 window.title('mytitle')
 window.geometry('1280x720')
 window.resizable(False, False)
-custom_font = font.Font(family='Arial', size=15)
+custom_font = font.Font(family='Ariel', size=15)
 
 s_settings = [
     {
