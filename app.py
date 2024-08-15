@@ -9,6 +9,7 @@ from frictionless import Schema
 from frictionless import validate
 import yaml
 import time
+import os
 
 window = tk.Tk()
 window.title('mytitle')
@@ -49,28 +50,46 @@ type_list = ['string', 'number', 'integer', 'boolean', 'datetime', 'date', 'time
 
 def showPage1():
     frame2.pack_forget()
+    frame3.pack_forget()
     frame1.pack(expand=True, fill='both')
     frame1.tkraise()
 
 def showPage2():
     frame1.pack_forget()
+    frame3.pack_forget()
     frame2.pack(expand=True, fill='both')
     frame2.tkraise()
+
+def showPage3():
+    frame1.pack_forget()
+    frame2.pack_forget()
+    frame3.pack(expand=True, fill='both')
+    frame3.tkraise()
 
 def browseDataFile():
     file_path = filedialog.askopenfilename()
     entry_data.delete(0, tk.END)
-    entry_data.insert(tk.END, file_path)
+    entry_data.insert(tk.END, os.path.relpath(file_path))
 
 def browseDescriptionFile():
     file_path = filedialog.askopenfilename()
     entry_description.delete(0, tk.END)
-    entry_description.insert(tk.END, file_path)
+    entry_description.insert(tk.END, os.path.relpath(file_path))
 
-def browseYamlFile():
+def browseYamlFile2():
     file_path = filedialog.askopenfilename()
     entry2_yaml.delete(0, tk.END)
-    entry2_yaml.insert(tk.END, file_path)
+    entry2_yaml.insert(tk.END, os.path.relpath(file_path))
+
+def browseDataFile3():
+    file_path = filedialog.askopenfilename()
+    entry3_data.delete(0, tk.END)
+    entry3_data.insert(tk.END, os.path.relpath(file_path))
+
+def browseYamlFile3():
+    file_path = filedialog.askopenfilename()
+    entry3_yaml.delete(0, tk.END)
+    entry3_yaml.insert(tk.END, os.path.relpath(file_path))
 
 def chkbox_apiPress():
     if chkbox_api_var.get():
@@ -122,8 +141,9 @@ def submitPress():
             listReport = list(csvReader)
             yaml_data = yaml.safe_load(file)
             for i in range(len(yaml_data['fields'])):
+                yaml_data['fields'][i]['title'] = listReport[1][i]
                 yaml_data['fields'][i]['description'] = listReport[2][i]
-                print(yaml_data['fields'][i]['description'])
+                # print(yaml_data['fields'][i]['description'])
         with open(yaml_filename, 'w', encoding='utf-8') as file:
             yaml.safe_dump(yaml_data, file)
 
@@ -216,6 +236,7 @@ def page2Show(cur):
     else:
         btn2_next.config(state='normal')
     entry2_name.delete(0, tk.END)
+    entry2_title.delete(0, tk.END)
     # entry2_type.delete(0, tk.END)
     entry2_description.delete(0, tk.END)
     for i in entry2_constraints:
@@ -224,6 +245,8 @@ def page2Show(cur):
     chkbox2_unique.deselect()
     if 'name' in yaml_data2['fields'][cur]:
         entry2_name.insert(tk.END, yaml_data2['fields'][cur]['name'])
+    if 'title' in yaml_data2['fields'][cur]:
+        entry2_title.insert(tk.END, yaml_data2['fields'][cur]['title'])
     if 'type' in yaml_data2['fields'][cur]:
         omenu2_type_var.set(yaml_data2['fields'][cur]['type'])
         # entry2_type.insert(tk.END, yaml_data2['fields'][cur]['type'])
@@ -248,6 +271,7 @@ def submit2Press():
     with open(entry2_yaml.get(), 'r', encoding='utf-8') as file:
         yaml_data2 = yaml.safe_load(file)
     entry2_name.config(state='normal')
+    entry2_title.config(state='normal')
     omenu2_type.config(state='normal')
     entry2_description.config(state='normal')
     chkbox2_required.config(state='normal')
@@ -261,6 +285,8 @@ def tmpSave(cur):
     global yaml_data2
     if entry2_name.get() != "":
         yaml_data2['fields'][cur]['name'] = entry2_name.get()
+    if entry2_title.get() != "":
+        yaml_data2['fields'][cur]['title'] = entry2_title.get()
     # if entry2_type.get() != "":
     #     yaml_data2['fields'][cur]['type'] = entry2_type.get()
     yaml_data2['fields'][cur]['type'] = omenu2_type_var.get()
@@ -295,16 +321,60 @@ def savePress():
     with open(entry2_yaml.get(), 'w') as file:
         yaml.safe_dump(yaml_data2, file)
 
+def submit3Press():
+    data_filename = entry3_data.get()
+    yaml_filename = entry3_yaml.get()
+
+    text3_result.config(state='normal')
+    text3_result.delete('1.0', tk.END)
+    text3_result.config(state='disabled')
+
+    yaml_report = validate(yaml_filename)
+    if yaml_report.valid:
+        data_report = validate(data_filename, schema=yaml_filename)
+        error_num = data_report.stats['errors']
+        if error_num == 0:
+            newMessege3('There are no errors in the dataset.')
+        elif error_num == 1:
+            newMessege3('There is 1 error in the dataset:')
+        else:
+            newMessege3(f'There are {error_num} errors in the dataset:')
+        for i in range(error_num):
+            newMessege3(f'{data_report.tasks[0].errors[i].title}:\n{data_report.tasks[0].errors[i].message}')
+    else:
+        newMessege3('The .yaml file is not valid')
+
+def newMessege3(cur):
+    text3_result.config(state='normal')
+    text3_result.insert('end', f'{cur}\n\n')
+    text3_result.config(state='disabled')
+
 ##########################
 
 menubar = tk.Menu(window)
 filemenu = tk.Menu(menubar)
 filemenu.add_command(label="page1", command=showPage1)
 filemenu.add_command(label="page2", command=showPage2)
+filemenu.add_command(label="page3", command=showPage3)
 menubar.add_cascade(label='Function', menu=filemenu)
 window.config(menu=menubar)
 frame1 = tk.Frame(window)
 frame2 = tk.Frame(window)
+frame3 = tk.Frame(window)
+frame3o = tk.Frame(frame3, height=100, width=150)
+frame3o.place(x=250, y=300)
+scrollbar = tk.Scrollbar(frame3o)
+scrollbar.pack(side='right', fill='y')
+text3_result = tk.Text(
+    frame3o,
+    height=13,
+    width=65,
+    yscrollcommand=scrollbar.set,
+    font=custom_font,
+    state='disabled'
+)
+text3_result.pack()
+scrollbar.config(command=text3_result.yview)
 
 ########################## frame1
 
@@ -394,6 +464,13 @@ lbl2_yaml = tk.Label(
 lbl2_name = tk.Label(
     frame2,
     text='name',
+    fg='black',
+    font=custom_font
+)
+
+lbl2_title = tk.Label(
+    frame2,
+    text='title',
     fg='black',
     font=custom_font
 )
@@ -497,7 +574,8 @@ lbl2_enum = tk.Label(
 )
 
 entry2_yaml = tk.Entry(frame2, font=custom_font, width=50)
-entry2_name = tk.Entry(frame2, font=custom_font, width=50, state='disabled')
+entry2_name = tk.Entry(frame2, font=custom_font, width=25, state='disabled')
+entry2_title = tk.Entry(frame2, font=custom_font, width=25, state='disabled')
 # entry2_type = tk.Entry(frame2, font=custom_font, width=50)
 entry2_description = tk.Entry(frame2, font=custom_font, width=50, state='disabled')
 
@@ -537,7 +615,7 @@ btn2_browse_yaml = tk.Button(
     frame2,
     text='...',
     font=custom_font,
-    command=browseYamlFile
+    command=browseYamlFile2
 )
 
 btn2_submit = tk.Button(
@@ -573,6 +651,7 @@ btn2_save = tk.Button(
 
 lbl2_yaml.place(x=20, y=100)
 lbl2_name.place(x=20, y=200)
+lbl2_title.place(x=700, y=200)
 lbl2_type.place(x=20, y=250)
 lbl2_description.place(x=20, y=300)
 lbl2_constraints.place(x=20, y=350)
@@ -589,6 +668,7 @@ lbl2_pattern.place(x=740, y=550)
 lbl2_enum.place(x=250, y=600)
 entry2_yaml.place(x=250, y=100)
 entry2_name.place(x=250, y=200)
+entry2_title.place(x=800, y=200)
 omenu2_type.place(x=250, y=250)
 entry2_description.place(x=250, y=300)
 entry2_constraints[0].place(x=450, y=400)
@@ -607,6 +687,62 @@ btn2_next.place(x=550, y=650)
 btn2_save.place(x=750, y=650)
 chkbox2_required.place(x=350, y=350)
 chkbox2_unique.place(x=820, y=350)
+
+############################# frame3
+
+lbl3_data = tk.Label(
+    frame3,
+    text='Data File',
+    fg='black',
+    font=custom_font
+)
+
+lbl3_yaml = tk.Label(
+    frame3,
+    text='YAML File',
+    fg='black',
+    font=custom_font
+)
+
+lbl3_result = tk.Label(
+    frame3,
+    text='Validation Results',
+    fg='black',
+    font=custom_font
+)
+
+entry3_data = tk.Entry(frame3, font=custom_font, width=50)
+entry3_yaml = tk.Entry(frame3, font=custom_font, width=50)
+
+btn3_browse_data = tk.Button(
+    frame3,
+    text='...',
+    font=custom_font,
+    command=browseDataFile3
+)
+
+btn3_browse_yaml = tk.Button(
+    frame3,
+    text='...',
+    font=custom_font,
+    command=browseYamlFile3
+)
+
+btn3_submit = tk.Button(
+    frame3,
+    text='Submit',
+    font=custom_font,
+    command=submit3Press
+)
+
+lbl3_data.place(x=20, y=100)
+lbl3_yaml.place(x=20, y=150)
+lbl3_result.place(x=20, y=250)
+entry3_data.place(x=250, y=100)
+entry3_yaml.place(x=250, y=150)
+btn3_browse_data.place(x=930, y=100)
+btn3_browse_yaml.place(x=930, y=150)
+btn3_submit.place(x=20, y=200)
 
 #############################
 
