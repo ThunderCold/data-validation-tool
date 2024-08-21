@@ -12,7 +12,7 @@ import time
 import os
 
 window = tk.Tk()
-window.title('mytitle')
+window.title('Data Validation Tool')
 window.geometry('1280x720')
 window.resizable(False, False)
 custom_font = font.Font(family='Ariel', size=15)
@@ -172,7 +172,6 @@ def submitPress():
                 # print(yaml_data['fields'][i]['description'])
         with open(yaml_filename, 'w', encoding='utf-8') as file:
             yaml.safe_dump(yaml_data, file)
-
 
     newMessege(f'Create {data_filename}.schema.yaml sucessfully')
 
@@ -391,9 +390,9 @@ def newMessege3(cur):
 
 menubar = tk.Menu(window)
 filemenu = tk.Menu(menubar)
-filemenu.add_command(label="page1", command=showPage1)
-filemenu.add_command(label="page2", command=showPage2)
-filemenu.add_command(label="page3", command=showPage3)
+filemenu.add_command(label="Generate dataset specification", command=showPage1)
+filemenu.add_command(label="Modify dataset specification", command=showPage2)
+filemenu.add_command(label="Validate dataset", command=showPage3)
 menubar.add_cascade(label='Function', menu=filemenu)
 window.config(menu=menubar)
 frame1 = tk.Frame(window)
@@ -705,7 +704,7 @@ btn2_next = tk.Button(
 
 btn2_save = tk.Button(
     frame2,
-    text='save',
+    text='Save',
     font=custom_font,
     command=savePress,
     state='disabled'
