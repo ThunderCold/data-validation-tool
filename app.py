@@ -39,13 +39,13 @@ s_settings = [
         "threshold": "BLOCK_NONE",
     }
 ]
-# cur_messege = tk.StringVar()
+
 global yaml_data2
 global pagenum_list
 sleep_time = 7
 page2_curnum = 0
 page2_yaml_len = 0
-cur_page = 1 # function in queue
+cur_page = 1
 constraints_list = ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'minLength', 'maxLength', 'jsonSchema', 'pattern', 'enum']
 type_list = ['string', 'number', 'integer', 'boolean', 'datetime', 'date', 'time', 'year', 'yearmonth', 'duration', 'geopoint', 'geojson', 'any', 'object', 'array', 'list']
 pagenum_list = ['']
@@ -143,8 +143,6 @@ def askGemini(i, model, listReport):
         contents=min_question,
         safety_settings=s_settings
     )
-    # print(f"max: {max_response.text.strip()}")
-    # print(f"min: {min_response.text.strip()}")
     newMessege(f'{name} field:\nminimum:{min_response.text.strip()}, maximum:{max_response.text.strip()}')
     return max_response.text.strip(), min_response.text.strip()
 
@@ -264,7 +262,6 @@ def page2Show(cur):
     entry2_name.delete(0, tk.END)
     entry2_title.delete(0, tk.END)
     entry2_format.delete(0, tk.END)
-    # entry2_type.delete(0, tk.END)
     entry2_description.delete(0, tk.END)
     for i in entry2_constraints:
         i.delete(0, tk.END)
@@ -277,7 +274,6 @@ def page2Show(cur):
         entry2_title.insert(tk.END, yaml_data2['fields'][cur]['title'])
     if 'type' in yaml_data2['fields'][cur]:
         omenu2_type_var.set(yaml_data2['fields'][cur]['type'])
-        # entry2_type.insert(tk.END, yaml_data2['fields'][cur]['type'])
     if 'format' in yaml_data2['fields'][cur]:
         entry2_format.insert(tk.END, yaml_data2['fields'][cur]['format'])
     if 'description' in yaml_data2['fields'][cur]:
@@ -300,7 +296,6 @@ def submit2Press():
     page2_curnum = 0
     with open(entry2_yaml.get(), 'r', encoding='utf-8') as file:
         yaml_data2 = yaml.safe_load(file)
-    # entry2_name.config(state='normal')
     entry2_title.config(state='normal')
     omenu2_type.config(state='normal')
     entry2_format.config(state='normal')
@@ -318,8 +313,6 @@ def tmpSave(cur):
         yaml_data2['fields'][cur]['name'] = entry2_name.get()
     if entry2_title.get() != "":
         yaml_data2['fields'][cur]['title'] = entry2_title.get()
-    # if entry2_type.get() != "":
-    #     yaml_data2['fields'][cur]['type'] = entry2_type.get()
     yaml_data2['fields'][cur]['type'] = omenu2_type_var.get()
     if entry2_format.get() != "":
         yaml_data2['fields'][cur]['format'] = entry2_format.get()
@@ -637,7 +630,6 @@ entry2_yaml = tk.Entry(frame2, font=custom_font, width=50)
 entry2_name = tk.Entry(frame2, font=custom_font, width=25, state='disabled')
 entry2_title = tk.Entry(frame2, font=custom_font, width=25, state='disabled')
 entry2_format = tk.Entry(frame2, font=custom_font, width=25, state='disabled')
-# entry2_type = tk.Entry(frame2, font=custom_font, width=50)
 entry2_description = tk.Entry(frame2, font=custom_font, width=50, state='disabled')
 
 omenu2_type_var = tk.StringVar()
